@@ -35,6 +35,7 @@ public class MainScene extends javax.swing.JFrame {
         exceedHealthYes = new javax.swing.JRadioButton();
         exceedHealthNo = new javax.swing.JRadioButton();
         startBtn = new javax.swing.JButton();
+        MazePanelPadding = new javax.swing.JPanel();
         MazePanel = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -153,10 +154,30 @@ public class MainScene extends javax.swing.JFrame {
 
         getContentPane().add(OptionsPanel, "card1");
 
-        MazePanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        MazePanelPadding.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        MazePanelPadding.setPreferredSize(new java.awt.Dimension(0, 0));
+
         MazePanel.setPreferredSize(new java.awt.Dimension(0, 0));
         MazePanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-        getContentPane().add(MazePanel, "card2");
+
+        javax.swing.GroupLayout MazePanelPaddingLayout = new javax.swing.GroupLayout(MazePanelPadding);
+        MazePanelPadding.setLayout(MazePanelPaddingLayout);
+        MazePanelPaddingLayout.setHorizontalGroup(
+            MazePanelPaddingLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(MazePanelPaddingLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(MazePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        MazePanelPaddingLayout.setVerticalGroup(
+            MazePanelPaddingLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(MazePanelPaddingLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(MazePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        getContentPane().add(MazePanelPadding, "card2");
 
         pack();
         setLocationRelativeTo(null);
@@ -177,7 +198,7 @@ public class MainScene extends javax.swing.JFrame {
 		//throw new RuntimeException("[FATAL-ERROR] Failed to start <SceneHandler>!");
 		
 		OptionsPanel.setVisible(false);
-		MazePanel.setVisible(true);
+		MazePanelPadding.setVisible(true);
     }//GEN-LAST:event_startBtnActionPerformed
 
 	public static MainScene run() {
@@ -203,7 +224,7 @@ public class MainScene extends javax.swing.JFrame {
 			spinnerEditor.getTextField().setFont(new Font("Tahoma", Font.PLAIN, 14));
 			
 			// Init Layers
-			window.MazePanel.setVisible(false);
+			window.MazePanelPadding.setVisible(false);
 		});
 		
 		try { Thread.sleep(1_000); } catch (InterruptedException e) {}
@@ -218,45 +239,45 @@ public class MainScene extends javax.swing.JFrame {
 		Robit robit = new Robit(maxHealth, canExceed);
 		Maze maze = new Maze(robit, mazeSize);
 		
-		int maxWidth = 0, maxHeight = 0;
+		int baseSize = 20;
 		
+		int maxWidth = baseSize, maxHeight = baseSize;
+		int rows = 0;
 		for (MazeTile tileRow[] : maze.getMaze()) {
-			int row = 0;
 			for (MazeTile tile : tileRow){
-				int width = 20, height = 20;
-				maxWidth += (width * tile.getX());
-				maxHeight += (height * tile.getY());
-				
 				JToggleButton currBtn = new JToggleButton();
 				AbsoluteConstraints pos;
-				pos = new AbsoluteConstraints(tile.getX() * width, tile.getY() * height, -1, -1);
+				pos = new AbsoluteConstraints(tile.getX() * baseSize, tile.getY() * baseSize, -1, -1);
 				
-				currBtn.setMinimumSize(new Dimension(width, height));
-				currBtn.setMaximumSize(new Dimension(width, height));
-				currBtn.setPreferredSize(new Dimension(width, height));
-				currBtn.setSize(new Dimension(width, height));
+				currBtn.setMinimumSize(new Dimension(baseSize, baseSize));
+				currBtn.setMaximumSize(new Dimension(baseSize, baseSize));
+				currBtn.setPreferredSize(new Dimension(baseSize, baseSize));
+				currBtn.setSize(new Dimension(baseSize, baseSize));
 				
 				MazePanel.add(currBtn, pos);
 			}
-			row++;
+			rows++;
 		}
+		maxWidth = maxWidth * rows;
+		maxHeight = maxHeight * rows;
 		
-		this.setPreferredSize(new Dimension(maxWidth, maxHeight));
+		Dimension size = new Dimension(maxWidth + 30, maxHeight + 60);
+		
+		System.out.println("W:" + maxWidth + "|H:" + maxHeight);
+		MazePanelPadding.setPreferredSize(size);
+		this.setPreferredSize(size);
 		
 		// ReSize and ReCenter
-		this.setLocationRelativeTo(null);
-		
-		this.revalidate();
-		this.repaint();
 		this.pack();
 		this.setResizable(false);
-		
+		this.setLocationRelativeTo(null);
 		this.setVisible(true);
 	}
 	
 //<editor-fold defaultstate="collapsed" desc=" Variables ">
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel MazePanel;
+    private javax.swing.JPanel MazePanelPadding;
     private javax.swing.JPanel OptionsPanel;
     private javax.swing.JLabel exceedHealthLabel;
     private javax.swing.JRadioButton exceedHealthNo;
