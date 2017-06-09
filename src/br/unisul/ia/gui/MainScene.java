@@ -6,11 +6,10 @@ import br.unisul.ia.entity.MazeTile;
 import br.unisul.ia.entity.Robit;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
+import org.netbeans.lib.awtextra.AbsoluteConstraints;
 
 public class MainScene extends javax.swing.JFrame {
 
@@ -40,8 +39,11 @@ public class MainScene extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Maze");
+        setPreferredSize(new java.awt.Dimension(400, 290));
         setResizable(false);
         getContentPane().setLayout(new java.awt.CardLayout());
+
+        OptionsPanel.setPreferredSize(new java.awt.Dimension(0, 0));
 
         titleLabel.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
         titleLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -149,10 +151,12 @@ public class MainScene extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        getContentPane().add(OptionsPanel, "card2");
+        getContentPane().add(OptionsPanel, "card1");
 
+        MazePanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        MazePanel.setPreferredSize(new java.awt.Dimension(0, 0));
         MazePanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-        getContentPane().add(MazePanel, "card3");
+        getContentPane().add(MazePanel, "card2");
 
         pack();
         setLocationRelativeTo(null);
@@ -166,9 +170,11 @@ public class MainScene extends javax.swing.JFrame {
 		
 		SceneHandler.getInstance().setUserInput(size, health, exceed);
 		
-		try { SceneHandler.getInstance().start(); } catch (Exception e) {
-			throw new RuntimeException("[FATAL-ERROR] Failed to start <SceneHandler>!");
-		}
+		//try { Thread.sleep(1_000); } catch (InterruptedException ex) { System.out.println("Thread couldn't sleep!"); }
+		
+		SceneHandler handler = SceneHandler.getInstance();
+		handler.start();
+		//throw new RuntimeException("[FATAL-ERROR] Failed to start <SceneHandler>!");
 		
 		OptionsPanel.setVisible(false);
 		MazePanel.setVisible(true);
@@ -207,29 +213,45 @@ public class MainScene extends javax.swing.JFrame {
 	}
 	
 	public void generateMaze(int mazeSize, int maxHealth, boolean canExceed) throws InstantiationException {
+		this.setVisible(false);
+		
 		Robit robit = new Robit(maxHealth, canExceed);
 		Maze maze = new Maze(robit, mazeSize);
+		
+		int maxWidth = 0, maxHeight = 0;
+		
 		for (MazeTile tileRow[] : maze.getMaze()) {
 			int row = 0;
 			for (MazeTile tile : tileRow){
 				int width = 20, height = 20;
-				JToggleButton currBtn = new JToggleButton();
+				maxWidth += (width * tile.getX());
+				maxHeight += (height * tile.getY());
 				
-				currBtn.setPreferredSize(new Dimension(width, height));
+				JToggleButton currBtn = new JToggleButton();
+				AbsoluteConstraints pos;
+				pos = new AbsoluteConstraints(tile.getX() * width, tile.getY() * height, -1, -1);
+				
 				currBtn.setMinimumSize(new Dimension(width, height));
 				currBtn.setMaximumSize(new Dimension(width, height));
+				currBtn.setPreferredSize(new Dimension(width, height));
 				currBtn.setSize(new Dimension(width, height));
-				currBtn.setLocation(tile.getX() * width, tile.getY() * height);
 				
-				MazePanel.add(currBtn);
+				MazePanel.add(currBtn, pos);
 			}
 			row++;
 		}
 		
+		this.setPreferredSize(new Dimension(maxWidth, maxHeight));
+		
 		// ReSize and ReCenter
-		int width = maze.getMazeSize() * 50, height = maze.getMazeSize() * 50;
-		this.setSize(width, height);
 		this.setLocationRelativeTo(null);
+		
+		this.revalidate();
+		this.repaint();
+		this.pack();
+		this.setResizable(false);
+		
+		this.setVisible(true);
 	}
 	
 //<editor-fold defaultstate="collapsed" desc=" Variables ">

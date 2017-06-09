@@ -1,6 +1,8 @@
 package br.unisul.ia.core;
 
 import br.unisul.ia.gui.MainScene;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SceneHandler {
 	
@@ -52,10 +54,15 @@ public class SceneHandler {
 		this.canExceed = canExceed;
 	}
 	
-	public void start() throws InstantiationException {
+	public void start() {
 		if (this.flag) {
-			scene.generateMaze(this.mazeSize, this.maxHealth, this.canExceed);
-			new SceneHandlerWorker(this);
+			this.flag = true;
+			try {
+				scene.generateMaze(this.mazeSize, this.maxHealth, this.canExceed);
+				//new SceneHandlerWorker(this);
+			} catch (InstantiationException ex) {
+				throw new RuntimeException("[FATAL-ERROR] Scene coudldn't generate maze!");
+			}
 		}
 	}
 }
