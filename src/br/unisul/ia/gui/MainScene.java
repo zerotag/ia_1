@@ -1,5 +1,17 @@
 package br.unisul.ia.gui;
 
+import br.unisul.ia.core.SceneHandler;
+import br.unisul.ia.entity.Maze;
+import br.unisul.ia.entity.MazeTile;
+import br.unisul.ia.entity.Robit;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JSpinner;
+import javax.swing.JTextField;
+import javax.swing.JToggleButton;
+
 public class MainScene extends javax.swing.JFrame {
 
 	private static MainScene window;
@@ -13,11 +25,10 @@ public class MainScene extends javax.swing.JFrame {
     private void initComponents() {
 
         inputExceedHealthGroup = new javax.swing.ButtonGroup();
-        MazePanel = new javax.swing.JPanel();
         OptionsPanel = new javax.swing.JPanel();
         titleLabel = new javax.swing.JLabel();
         mazeSizeLabel = new javax.swing.JLabel();
-        mazeSize = new javax.swing.JTextField();
+        mazeSize = new javax.swing.JSpinner();
         separator1 = new javax.swing.JSeparator();
         maxHealthLabel = new javax.swing.JLabel();
         maxHealth = new javax.swing.JTextField();
@@ -25,11 +36,12 @@ public class MainScene extends javax.swing.JFrame {
         exceedHealthYes = new javax.swing.JRadioButton();
         exceedHealthNo = new javax.swing.JRadioButton();
         startBtn = new javax.swing.JButton();
+        MazePanel = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Maze");
         setResizable(false);
-        getContentPane().setLayout(new javax.swing.OverlayLayout(getContentPane()));
+        getContentPane().setLayout(new java.awt.CardLayout());
 
         titleLabel.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
         titleLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -42,13 +54,7 @@ public class MainScene extends javax.swing.JFrame {
         mazeSizeLabel.setMinimumSize(new java.awt.Dimension(20, 14));
         mazeSizeLabel.setPreferredSize(new java.awt.Dimension(20, 14));
 
-        mazeSize.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        mazeSize.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        mazeSize.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                mazeSizeKeyTyped(evt);
-            }
-        });
+        mazeSize.setModel(new javax.swing.SpinnerNumberModel(10, 3, null, 1));
 
         maxHealthLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         maxHealthLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
@@ -59,6 +65,7 @@ public class MainScene extends javax.swing.JFrame {
 
         maxHealth.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         maxHealth.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        maxHealth.setText("50");
 
         exceedHealthLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         exceedHealthLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
@@ -72,10 +79,16 @@ public class MainScene extends javax.swing.JFrame {
         exceedHealthYes.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
 
         inputExceedHealthGroup.add(exceedHealthNo);
+        exceedHealthNo.setSelected(true);
         exceedHealthNo.setText("No");
         exceedHealthNo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
 
         startBtn.setText("Start");
+        startBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                startBtnActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout OptionsPanelLayout = new javax.swing.GroupLayout(OptionsPanel);
         OptionsPanel.setLayout(OptionsPanelLayout);
@@ -99,12 +112,12 @@ public class MainScene extends javax.swing.JFrame {
                                     .addComponent(exceedHealthLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(maxHealthLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                 .addGap(18, 18, 18)
-                                .addGroup(OptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(maxHealth, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGroup(OptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(OptionsPanelLayout.createSequentialGroup()
                                         .addComponent(exceedHealthYes, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(exceedHealthNo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))))))
+                                        .addComponent(exceedHealthNo, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(maxHealth, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE))))))
                 .addContainerGap())
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, OptionsPanelLayout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -119,9 +132,9 @@ public class MainScene extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(separator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(OptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(mazeSizeLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(mazeSize, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(OptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(mazeSizeLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 30, Short.MAX_VALUE)
+                    .addComponent(mazeSize))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(OptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(maxHealthLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -133,39 +146,33 @@ public class MainScene extends javax.swing.JFrame {
                     .addComponent(exceedHealthNo))
                 .addGap(18, 18, 18)
                 .addComponent(startBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(30, 30, 30))
-        );
-
-        javax.swing.GroupLayout MazePanelLayout = new javax.swing.GroupLayout(MazePanel);
-        MazePanel.setLayout(MazePanelLayout);
-        MazePanelLayout.setHorizontalGroup(
-            MazePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, MazePanelLayout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(OptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-        );
-        MazePanelLayout.setVerticalGroup(
-            MazePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(MazePanelLayout.createSequentialGroup()
-                .addComponent(OptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        getContentPane().add(MazePanel);
+        getContentPane().add(OptionsPanel, "card2");
+
+        MazePanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        getContentPane().add(MazePanel, "card3");
 
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void mazeSizeKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_mazeSizeKeyTyped
-        evt.consume();
-		char[] nums = com.zerotag.universal.ciencia.Matematica.NUM.toCharArray();
-		for (char num : nums) {
-			if (evt.getKeyChar() == num) {
-				mazeSize.setText(mazeSize.getText() + num);
-			}
+    private void startBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startBtnActionPerformed
+        int size = (Integer)mazeSize.getValue();
+		int health = Integer.parseInt(maxHealth.getText());
+		boolean exceed = false;
+		if (exceedHealthYes.isSelected()) {exceed = true;}
+		
+		SceneHandler.getInstance().setUserInput(size, health, exceed);
+		
+		try { SceneHandler.getInstance().start(); } catch (Exception e) {
+			throw new RuntimeException("[FATAL-ERROR] Failed to start <SceneHandler>!");
 		}
-    }//GEN-LAST:event_mazeSizeKeyTyped
+		
+		OptionsPanel.setVisible(false);
+		MazePanel.setVisible(true);
+    }//GEN-LAST:event_startBtnActionPerformed
 
 	public static MainScene run() {
 		//<editor-fold defaultstate="collapsed" desc=" Look and Feel ">
@@ -183,12 +190,49 @@ public class MainScene extends javax.swing.JFrame {
 
 		java.awt.EventQueue.invokeLater(() -> {
 			window = new MainScene();
-			window.setVisible(true);
+			
+			// Fix Spinner Default Alignment and Font
+			JSpinner.DefaultEditor spinnerEditor = (JSpinner.DefaultEditor)window.mazeSize.getEditor();
+			spinnerEditor.getTextField().setHorizontalAlignment(JTextField.CENTER);
+			spinnerEditor.getTextField().setFont(new Font("Tahoma", Font.PLAIN, 14));
+			
+			// Init Layers
+			window.MazePanel.setVisible(false);
 		});
+		
+		try { Thread.sleep(1_000); } catch (InterruptedException e) {}
+		window.setVisible(true);
 		
 		return window;
 	}
-
+	
+	public void generateMaze(int mazeSize, int maxHealth, boolean canExceed) throws InstantiationException {
+		Robit robit = new Robit(maxHealth, canExceed);
+		Maze maze = new Maze(robit, mazeSize);
+		for (MazeTile tileRow[] : maze.getMaze()) {
+			int row = 0;
+			for (MazeTile tile : tileRow){
+				int width = 20, height = 20;
+				JToggleButton currBtn = new JToggleButton();
+				
+				currBtn.setPreferredSize(new Dimension(width, height));
+				currBtn.setMinimumSize(new Dimension(width, height));
+				currBtn.setMaximumSize(new Dimension(width, height));
+				currBtn.setSize(new Dimension(width, height));
+				currBtn.setLocation(tile.getX() * width, tile.getY() * height);
+				
+				MazePanel.add(currBtn);
+			}
+			row++;
+		}
+		
+		// ReSize and ReCenter
+		int width = maze.getMazeSize() * 50, height = maze.getMazeSize() * 50;
+		this.setSize(width, height);
+		this.setLocationRelativeTo(null);
+	}
+	
+//<editor-fold defaultstate="collapsed" desc=" Variables ">
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel MazePanel;
     private javax.swing.JPanel OptionsPanel;
@@ -198,10 +242,11 @@ public class MainScene extends javax.swing.JFrame {
     private javax.swing.ButtonGroup inputExceedHealthGroup;
     private javax.swing.JTextField maxHealth;
     private javax.swing.JLabel maxHealthLabel;
-    private javax.swing.JTextField mazeSize;
+    private javax.swing.JSpinner mazeSize;
     private javax.swing.JLabel mazeSizeLabel;
     private javax.swing.JSeparator separator1;
     private javax.swing.JButton startBtn;
     private javax.swing.JLabel titleLabel;
     // End of variables declaration//GEN-END:variables
+	//</editor-fold>
 }

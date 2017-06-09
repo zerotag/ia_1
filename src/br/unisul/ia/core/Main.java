@@ -1,15 +1,11 @@
 package br.unisul.ia.core;
 
-import br.unisul.ia.entity.Maze;
-import br.unisul.ia.entity.Robit;
-import br.unisul.ia.gui.MainScene;
-import javax.swing.JOptionPane;
-
 public class Main {
 	public static void main(String[] args) {
 		
-		MainScene window = MainScene.run();
+		SceneHandler.getInstance();
 		
+		/*
 		boolean success = true;
 		while (!success) {
 			// Square Matrix (AxA)
@@ -47,5 +43,6 @@ public class Main {
 				JOptionPane.showMessageDialog(null, "ERROR! One or more inputs are not valid!");
 			}
 		}
+		*/
 	}
 }

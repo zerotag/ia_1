@@ -337,4 +337,12 @@ public class Maze {
 		
 		return printMaze;
 	}
+
+	public int getMazeSize() {
+		return mazeSize;
+	}
+
+	public MazeTile[][] getMaze() {
+		return maze;
+	}
 }
