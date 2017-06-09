@@ -2,11 +2,15 @@ package br.unisul.ia.core;
 
 import br.unisul.ia.entity.Maze;
 import br.unisul.ia.entity.Robit;
+import br.unisul.ia.gui.MainScene;
 import javax.swing.JOptionPane;
 
 public class Main {
 	public static void main(String[] args) {
-		boolean success = false;
+		
+		MainScene window = MainScene.run();
+		
+		boolean success = true;
 		while (!success) {
 			// Square Matrix (AxA)
 			String mazeSizeRaw = JOptionPane.showInputDialog(null, "Maze Order");
