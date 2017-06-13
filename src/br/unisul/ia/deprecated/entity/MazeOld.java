@@ -1,15 +1,14 @@
-package br.unisul.ia.entity;
+package br.unisul.ia.deprecated.entity;
 
+import br.unisul.ia.core.SceneHandler;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
-public class Maze {
+public class MazeOld {
 	private boolean masterFLAG = false;
-	private final Robit robit;
 	
 	private final int mazeSize;
 	private final MazeTile maze[][];
@@ -23,27 +22,27 @@ public class Maze {
 	private int generatedPacksOf10	= 0;
 	/* ******** */
 	
-	private Maze() {this.robit = null; this.entrance = null; this.exit = null; this.mazeSize = -1; this.maze = null;}
+	
+	
+	private MazeOld() { this.entrance = null; this.exit = null; this.mazeSize = -1; this.maze = null;}
 
 	/**
-	 * @param robit object of type Robit
 	 * @param mazeSize single integer value
 	 * @throws java.lang.InstantiationException if (mazeSize &lt; 3)
 	 */
-	public Maze(Robit robit, int mazeSize) throws InstantiationException {
+	public MazeOld(int mazeSize) throws InstantiationException {
 		if (mazeSize < 3) throw new InstantiationException("Minimum matrix order is 3!");
-		this.robit = robit;
 		this.mazeSize = mazeSize;
 		this.maze = new MazeTile[this.mazeSize][this.mazeSize];
 		initMaze();
 	}
 	
+	//<editor-fold defaultstate="collapsed" desc="MazeOld Initialization">
 	private void initMaze(){
 		this.initMazeTiles();
 		this.initNotWalkableTiles(10, 25);	// Default Aspect Ratios
 		this.initRepairPacks(5, 3);			// Default Aspect Ratios
 	}
-	
 	private void initMazeTiles() {
 		for (int y = 0; y < this.mazeSize; y++) {
 			for (int x = 0; x < this.mazeSize; x++) {
@@ -54,7 +53,6 @@ public class Maze {
 		this.entrance = this.maze[0][0].setEntrance();
 		this.exit = this.maze[this.mazeSize - 1][this.mazeSize - 1].setExit();
 	}
-	
 	private void initNotWalkableTiles(int sizeOfMin, int sizeOfMax) {
 		double countMin = 0, countMax = 0;
 		for (int m = 0; m < this.mazeSize; m++) { countMin += (sizeOfMin / 10.0); }
@@ -83,7 +81,6 @@ public class Maze {
 			}
 		}
 	}
-	
 	private void initRepairPacks(int sizeOf5, int sizeOf10) {
 		double count5 = 0, count10 = 0;
 		for (int m = 0; m < this.mazeSize; m++) { count5 += (sizeOf5 / 10.0); }
@@ -101,7 +98,6 @@ public class Maze {
 		addPacksToMaze(packsOf5);
 		addPacksToMaze(packsOf10);
 	}
-	
 	private void addPacksToMaze(List<RepairPack> packList) {
 		while ( !packList.isEmpty() ) {
 			int posX = ThreadLocalRandom.current().nextInt(0, this.mazeSize + 1);
@@ -119,98 +115,61 @@ public class Maze {
 			}
 		}
 	}
-
-	public Robit getRobit() {
-		return robit;
-	}
+	// </editor-fold>
 	
+	//<editor-fold defaultstate="collapsed" desc="@Deprecated">
+	@Deprecated
 	public void runRobit() {
-		
 		// Set Robit at the Entrance
-		Robit me = this.robit;
-		me.setX(this.entrance.getX()).setY(this.entrance.getY());
+		Robit me = SceneHandler.getInstance().getRobit();
 		
-		LinkedList<MazeTile> queue = new LinkedList<>();
-		queue.add(this.entrance);
+		LinkedList<MazeTile> queue = me.getMyPath();
 		
-		do {
-			MazeTile currentTile = queue.removeFirst();
-			LinkedList<MazeTile> next = this.nextNeighbors(currentTile);
-			
-			if (next.isEmpty()) {currentTile.lock(); continue;}
-			
-			MazeTile first = next.getFirst();
-			double count = next.stream().filter((t) -> {
-				return (!t.isLocked()) && (!t.isVisited());
-			}).count();
-			
-			/******* LOG */
-			String thisTileLog = "";
-			
-			thisTileLog += "Hi! I'm TILE -> X:"+currentTile.getX()+"|Y:"+currentTile.getY() + "\n";
-			thisTileLog += "I have these eligible neighbors:\n";
-			
-			int logCount = 1;
-			for (MazeTile neighbor : next) {
-				if (neighbor != null) {
-					thisTileLog += "\tHi! I'm NeighborTile -> X:" + neighbor.getX() + "|Y:" + neighbor.getY() + "\n";
-					thisTileLog += "\t\tI have these properties:\n";
-					thisTileLog += "\t\t\t" + (!neighbor.isEntrance()	? "I'm NOT the entrance."	: "I'm the ENTRANCE!")			+ "\n";
-					thisTileLog += "\t\t\t" + (!neighbor.isExit()		? "I'm NOT the exit."		: "I'm the EXIT!")				+ "\n";
-					thisTileLog += "\t\t\t" + (!neighbor.isWalkable()	? "I'm a WALL."				: "I'm NOT a wall!")			+ "\n";
-					thisTileLog += "\t\t\t" + (!neighbor.isVisited()	? "You didn't visit me yet!": "You already visited me!")	+ "\n";
-					thisTileLog += "\t\t\t" + (neighbor.isLocked()		? "I've been LOCKED."		: "I'm UNLOCKED")				+ "\n";
-					thisTileLog += "\t\t\t" + (neighbor.hasRepairPack()	? "I have a RepairPack!"	: "I don't have a RepairPack")	+ "\n";
-				} else {
-					thisTileLog += "\tHi! I'm a NULL Neighbor! I don't have properties! This shouldn't happen!";
-				}
-				if (logCount != next.size()) thisTileLog += "\n";
-				logCount++;
-			}
-			
-			System.out.println("");
-			System.out.println(thisTileLog);
-			
-			if( count == 0 ) {
-				currentTile.lock(); System.out.println("I'm a dead end! I Locked myself off!");
-			}
-			/**************/
-			
-			if (next.size() > 1) {
-				next.removeFirst();
-				queue.addAll(0, next);
-				queue.addFirst(currentTile);
-				queue.addFirst(first);
-			} else {
-				queue.addFirst(currentTile);
-				queue.addFirst(first);
-			}
-			
-			// IF NOT VISITED, WE DO NOW
-			if (!currentTile.isVisited()) currentTile.visit();
-			
-			// CHECK FOR REPAIR PACKS AT CURRENT LOCATION
-			if ( currentTile.hasRepairPack() ) { me.addEnergy(currentTile.getRepairPack().use()); }
-			
-			// UPDATE CURRENT LOCATION and UPDATE ENERGY
-			me.step();
-			me.setX(currentTile.getX()).setY(currentTile.getY());
-			me.remEnergy(1);
-			
-			// IF EXIT: YAY! WE DIT IT!
-			if (currentTile == this.exit) {this.masterFLAG = true; break;}
-			
-			// IF ROBIT DIES STOP
-			if (!me.isAlive()){ break; }
-			
-			this.printMaze();
-		} while (!queue.isEmpty());
-		
+		MazeTile currentTile = queue.removeFirst();
+		LinkedList<MazeTile> next = this.nextNeighbors(currentTile);
+
+		if (next.isEmpty()) {currentTile.lock();} else {
+
+		MazeTile first = next.getFirst();
+		double count = next.stream().filter((t) -> {
+			return (!t.isLocked()) && (!t.isVisited());
+		}).count();
+
+		if( count == 0 ) currentTile.lock();
+
+		if (next.size() > 1) {
+			next.removeFirst();
+			queue.addAll(0, next);
+			queue.addFirst(currentTile);
+			queue.addFirst(first);
+		} else {
+			queue.addFirst(currentTile);
+			queue.addFirst(first);
+		}
+
+		// IF NOT VISITED, WE DO NOW
+		if (!currentTile.isVisited()) currentTile.visit();
+
+		// CHECK FOR REPAIR PACKS AT CURRENT LOCATION
+		if ( currentTile.hasRepairPack() ) { me.addEnergy(currentTile.getRepairPack().use()); }
+
+		// UPDATE CURRENT LOCATION and UPDATE ENERGY
+		me.step();
+		me.setX(currentTile.getX()).setY(currentTile.getY());
+		me.remEnergy(1);
+
+		// IF EXIT: YAY! WE DIT IT!
+		if (currentTile == this.exit) {this.masterFLAG = true; break;}
+
+		// IF ROBIT DIES STOP
+		if (!me.isAlive()){ break; }
+
+		currentTile.update();
+		}
 		// IF EXIT NOT FOUND (BUT ROBIT STILL ALIVE), THIS IS AN INVALID MAZE
-		if (!this.masterFLAG && this.robit.isAlive()) { JOptionPane.showMessageDialog(null, "Sorry! This maze is unsolvable!"); }
-		
-		this.printMaze("full");
+		if (!this.masterFLAG && SceneHandler.getInstance().getRobit().isAlive()) { JOptionPane.showMessageDialog(null, "Sorry! This maze is unsolvable!"); }
 	}
+	//</editor-fold>
 	
 	private LinkedList<MazeTile> nextNeighbors( MazeTile currentNode ){
 		// The effective list that will be returned
@@ -279,70 +238,31 @@ public class Maze {
 		return neighbors;
 	}
 	
-	public void printMaze() {
-		printMaze("");
-	}
-	
-	public void printMaze(String option) {
-		Robit me = this.robit;
-		String printable = getPrint();
-		String title;
-		int icon = -1;
-		
-		if (!me.isAlive())			{title = "OH NO! Robit died!"; icon = JOptionPane.ERROR_MESSAGE;}
-		else if (this.masterFLAG)	{title = "Success!";}
-		else						{title = "Maze";}
-		
-		switch (option) {
-			case "full":
-				System.out.println("[MAZE]<TILES> Total: " + (this.mazeSize * this.mazeSize));
-				System.out.println("[MAZE]<WALLS> [MIN, MAX] -> Selected: [" + this.wallsMIN + ", " + this.wallsMAX + "] -> " + this.generatedWalls);
-				System.out.println("[MAZE]<RepairPack><05> Total: " + this.generatedPacksOf5);
-				System.out.println("[MAZE]<RepairPack><10> Total: " + this.generatedPacksOf10);
-				System.out.println("[ROBIT]<State> Alive: " + (me.isAlive() ? "TRUE" : "FALSE"));
-				System.out.println("[ROBIT]<Steps> Taken: " + me.getSteps());
-				System.out.println("[ROBIT]<Energy> Current: " + me.getEnergy());
-				System.out.println("[ROBIT]<Energy> Gained: " + me.getEnergyGain());
-				System.out.println("");
-				
-				System.out.println("[MAZE]<Matrix> Simplified");
-				for (int y = 0; y < this.mazeSize; y++) {
-					for (int x = 0; x < this.mazeSize; x++) {
-						MazeTile tile = this.maze[x][y];
-						String state;
-						if (tile.isEntrance())			{state = "E";}
-						else if (tile.isExit())			{state = "X"; icon = JOptionPane.INFORMATION_MESSAGE;}
-						else if (!tile.isWalkable())	{state = "#";}
-						else							{state = "0";}
-						System.out.print( "S:" + state + "|X:" + tile.getX() + "|Y:" + tile.getY());
-						if (x!=this.mazeSize-1) { System.out.print("%"); }
-					}
-					System.out.println("");
-				}
-			break;
-		}
-		
-		JOptionPane.showMessageDialog(null, new JLabel("<html>" + printable + "</html>"), title, icon);
-	}
-	
-	private String getPrint() {
-		String printMaze = "";
-		
-		for (int x = 0; x < this.mazeSize; x++) {
-			for (int y = 0; y < this.mazeSize; y++) {
-				printMaze += this.maze[y][x].toString(this.robit);
-			}
-			printMaze += "<br />";
-		}
-		
-		return printMaze;
-	}
-
 	public int getMazeSize() {
 		return mazeSize;
 	}
 
+	public MazeTile getEntrance() {
+		return entrance;
+	}
+
+	public MazeTile getExit() {
+		return exit;
+	}
+
 	public MazeTile[][] getMaze() {
 		return maze;
+	}
+
+	public void updateAll() {
+		for (MazeTile[] mazeRow : maze) {
+			for (MazeTile mazeTile : mazeRow) {
+				mazeTile.update();
+			}
+		}
+	}
+
+	public LinkedList<MazeTile> getMyNeighbors(MazeTile currentTile) {
+		return this.nextNeighbors(currentTile);
 	}
 }

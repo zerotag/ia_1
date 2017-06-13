@@ -1,12 +1,12 @@
-package br.unisul.ia.core;
+package br.unisul.ia.deprecated.core;
 
-import br.unisul.ia.gui.MainScene;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import br.unisul.ia.deprecated.entity.MazeOld;
+import br.unisul.ia.mvc.model.entity.Robit;
+import br.unisul.ia.deprecated.gui.MainSceneOld;
 
 public class SceneHandler {
 	
-	private final MainScene scene;
+	private MainSceneOld scene;
 	
 	private boolean flag = false;
 	
@@ -14,8 +14,12 @@ public class SceneHandler {
 	private int maxHealth = 0;
 	private boolean canExceed = false;
 	
+	private SceneHandlerWorker worker;
+	private Robit robit;
+	private MazeOld maze;
+	
 	private SceneHandler() {
-		this.scene = MainScene.run();
+		MainSceneOld.run();
 	}
 	public static SceneHandler getInstance() { return SceneHandlerHolder.INSTANCE; }
 	private static class SceneHandlerHolder {
@@ -53,16 +57,34 @@ public class SceneHandler {
 	public void setCanExceed(boolean canExceed) {
 		this.canExceed = canExceed;
 	}
+
+	public void setScene(MainSceneOld scene) {
+		this.scene = scene;
+	}
+
+	public MainSceneOld getScene() {
+		return scene;
+	}
+
+	public Robit getRobit() {
+		return robit;
+	}
+
+	public MazeOld getMaze() {
+		return maze;
+	}
 	
-	public void start() {
+	public void execute() throws InstantiationException {
 		if (this.flag) {
 			this.flag = true;
-			try {
-				scene.generateMaze(this.mazeSize, this.maxHealth, this.canExceed);
-				//new SceneHandlerWorker(this);
-			} catch (InstantiationException ex) {
-				throw new RuntimeException("[FATAL-ERROR] Scene coudldn't generate maze!");
-			}
+			
+			// OUR MAZE AND ROBIT
+			this.maze = new MazeOld(this.mazeSize);
+			this.robit = new Robit(this.maxHealth, this.canExceed);
+			
+			scene.generateMaze(this.maze);
+			worker = new SceneHandlerWorker(this);
+			worker.execute();
 		}
 	}
 }

@@ -1,21 +1,20 @@
-package br.unisul.ia.gui;
+package br.unisul.ia.deprecated.gui;
 
-import br.unisul.ia.core.SceneHandler;
-import br.unisul.ia.entity.Maze;
-import br.unisul.ia.entity.MazeTile;
-import br.unisul.ia.entity.Robit;
+import br.unisul.ia.deprecated.core.SceneHandler;
+import br.unisul.ia.deprecated.entity.MazeOld;
+import br.unisul.ia.deprecated.entity.MazeTile;
 import java.awt.Dimension;
 import java.awt.Font;
+import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
-import javax.swing.JToggleButton;
 import org.netbeans.lib.awtextra.AbsoluteConstraints;
 
-public class MainScene extends javax.swing.JFrame {
+public class MainSceneOld extends javax.swing.JFrame {
 
-	private static MainScene window;
+	private static MainSceneOld window;
 
-	private MainScene() {
+	private MainSceneOld() {
 		initComponents();
 	}
 	
@@ -40,7 +39,6 @@ public class MainScene extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Maze");
-        setPreferredSize(new java.awt.Dimension(400, 290));
         setResizable(false);
         getContentPane().setLayout(new java.awt.CardLayout());
 
@@ -149,12 +147,11 @@ public class MainScene extends javax.swing.JFrame {
                     .addComponent(exceedHealthNo))
                 .addGap(18, 18, 18)
                 .addComponent(startBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(41, Short.MAX_VALUE))
         );
 
         getContentPane().add(OptionsPanel, "card1");
 
-        MazePanelPadding.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         MazePanelPadding.setPreferredSize(new java.awt.Dimension(0, 0));
 
         MazePanel.setPreferredSize(new java.awt.Dimension(0, 0));
@@ -173,7 +170,7 @@ public class MainScene extends javax.swing.JFrame {
             MazePanelPaddingLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(MazePanelPaddingLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(MazePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(MazePanel, javax.swing.GroupLayout.DEFAULT_SIZE, 268, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -189,19 +186,20 @@ public class MainScene extends javax.swing.JFrame {
 		boolean exceed = false;
 		if (exceedHealthYes.isSelected()) {exceed = true;}
 		
-		SceneHandler.getInstance().setUserInput(size, health, exceed);
-		
-		//try { Thread.sleep(1_000); } catch (InterruptedException ex) { System.out.println("Thread couldn't sleep!"); }
-		
 		SceneHandler handler = SceneHandler.getInstance();
-		handler.start();
-		//throw new RuntimeException("[FATAL-ERROR] Failed to start <SceneHandler>!");
+		handler.setUserInput(size, health, exceed);
+		
+		try {
+			handler.execute();
+		} catch (InstantiationException e) {
+			throw new RuntimeException("[FATAL-ERROR] Unable to execute SceneHandler.");
+		}
 		
 		OptionsPanel.setVisible(false);
 		MazePanelPadding.setVisible(true);
     }//GEN-LAST:event_startBtnActionPerformed
 
-	public static MainScene run() {
+	public static void run() {
 		//<editor-fold defaultstate="collapsed" desc=" Look and Feel ">
 		try {
 			for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -211,12 +209,13 @@ public class MainScene extends javax.swing.JFrame {
 				}
 			}
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-			java.util.logging.Logger.getLogger(MainScene.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+			java.util.logging.Logger.getLogger(MainSceneOld.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
 		}
+		//</editor-fold>
 		//</editor-fold>
 
 		java.awt.EventQueue.invokeLater(() -> {
-			window = new MainScene();
+			window = new MainSceneOld();
 			
 			// Fix Spinner Default Alignment and Font
 			JSpinner.DefaultEditor spinnerEditor = (JSpinner.DefaultEditor)window.mazeSize.getEditor();
@@ -225,53 +224,40 @@ public class MainScene extends javax.swing.JFrame {
 			
 			// Init Layers
 			window.MazePanelPadding.setVisible(false);
+			window.setVisible(true);
+			
+			SceneHandler.getInstance().setScene(window);
 		});
-		
-		try { Thread.sleep(1_000); } catch (InterruptedException e) {}
-		window.setVisible(true);
-		
-		return window;
 	}
 	
-	public void generateMaze(int mazeSize, int maxHealth, boolean canExceed) throws InstantiationException {
-		this.setVisible(false);
-		
-		Robit robit = new Robit(maxHealth, canExceed);
-		Maze maze = new Maze(robit, mazeSize);
-		
-		int baseSize = 20;
-		
-		int maxWidth = baseSize, maxHeight = baseSize;
-		int rows = 0;
+	public void generateMaze(MazeOld maze) throws InstantiationException {
+		int rows = 0, columns = 0;
 		for (MazeTile tileRow[] : maze.getMaze()) {
+			columns = 0;
 			for (MazeTile tile : tileRow){
-				JToggleButton currBtn = new JToggleButton();
-				AbsoluteConstraints pos;
-				pos = new AbsoluteConstraints(tile.getX() * baseSize, tile.getY() * baseSize, -1, -1);
-				
-				currBtn.setMinimumSize(new Dimension(baseSize, baseSize));
-				currBtn.setMaximumSize(new Dimension(baseSize, baseSize));
-				currBtn.setPreferredSize(new Dimension(baseSize, baseSize));
-				currBtn.setSize(new Dimension(baseSize, baseSize));
-				
+				JLabel currBtn = tile.getGuiTile();
+				AbsoluteConstraints pos = tile.getPos();
 				MazePanel.add(currBtn, pos);
+				
+				columns++;
 			}
 			rows++;
 		}
-		maxWidth = maxWidth * rows;
-		maxHeight = maxHeight * rows;
 		
-		Dimension size = new Dimension(maxWidth + 30, maxHeight + 60);
+		// Calculate GUI Size for dynamic maze
+		int maxWidth	= (MazeTile.BASESIZE * columns)	+ 26 + (4 * columns);
+		int maxHeight	= (MazeTile.BASESIZE * rows)	+ 44 + (4 * rows);
 		
-		System.out.println("W:" + maxWidth + "|H:" + maxHeight);
-		MazePanelPadding.setPreferredSize(size);
-		this.setPreferredSize(size);
+		Dimension size = new Dimension(maxWidth, maxHeight);
 		
 		// ReSize and ReCenter
+		this.setPreferredSize(size);
+		this.revalidate();
+		this.repaint();
 		this.pack();
+		
 		this.setResizable(false);
 		this.setLocationRelativeTo(null);
-		this.setVisible(true);
 	}
 	
 //<editor-fold defaultstate="collapsed" desc=" Variables ">
