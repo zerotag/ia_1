@@ -328,6 +328,8 @@ public class Maze {
 	private String getPrint() {
 		String printMaze = "";
 		
+		printMaze += "Robit's Energy: " + robit.getEnergy() + "<br />";
+		
 		for (int x = 0; x < this.mazeSize; x++) {
 			for (int y = 0; y < this.mazeSize; y++) {
 				printMaze += this.maze[y][x].toString(this.robit);
