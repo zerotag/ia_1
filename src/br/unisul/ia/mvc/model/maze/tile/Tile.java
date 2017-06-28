@@ -1,6 +1,8 @@
 package br.unisul.ia.mvc.model.maze.tile;
 
-public abstract class Tile {
+import br.unisul.ia.mvc.model.Model;
+
+public abstract class Tile extends Model {
 	
 	private final int x;
 	private final int y;

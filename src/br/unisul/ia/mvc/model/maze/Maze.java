@@ -1,6 +1,8 @@
 package br.unisul.ia.mvc.model.maze;
 
-public class Maze {
+import br.unisul.ia.mvc.model.Model;
+
+public class Maze extends Model {
 
 	// Actual data for the maze
 	
